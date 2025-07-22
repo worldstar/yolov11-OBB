@@ -22,17 +22,17 @@ j \= 0 \#switch j between 0 & 1 to run this block twice
 for i in range (j,2): \#switch j between 0 & 1: before & after saving pickle  
     if i \== 0:  
         \!pip uninstall ultralytics \-y  
-        \!git clone https://github.com/Suppersine/yolo\_alternative\_loss\_functions.git  
+         \!git clone https://github.com/Suppersine/yolo\_alternative\_loss\_functions.git  
     %cd yolo\_alternative\_loss\_functions  
     \!pip install \-e .  
-     
+   \# \~/ depends on the home directory  
      
     if i \== 0:  
         import os  
         os.kill(os.getpid(), 9)  \# This will restart the runtime  
     else:  
         import sys  
-        sys.path.insert(0, '/home/u3618315/yolo\_alternative\_loss\_functions')  
+        sys.path.insert(0, '\~/yolo\_alternative\_loss\_functions')  
          
         \# Now you can import ultralytics modules  
         import ultralytics  
@@ -88,10 +88,10 @@ print(ultralytics.\_\_file\_\_)  \# Should point to your cloned directory
 \#once the address checking is done, start training the model with (y)our custom dataset  
 \!jupyter \--paths
 
-filedir \= '/home/u3618315/obb\_dataset/'  
-yamldir \= '/home/u3618315/obb\_dataset/datav11.yaml'  
-homedir \= '/home/u3618315/'  
-yolodir \= '/home/u3618315/yolo\_alternative\_loss\_functions/'
+filedir \= '\~/obb\_dataset/'  
+yamldir \= '\~/obb\_dataset/datav11.yaml'  
+homedir \= '\~/'  
+yolodir \= '\~/yolo\_alternative\_loss\_functions/'
 
 \#\!pip install zip  
 \#\!sudo apt-get update && apt-get install \-y zip
@@ -136,7 +136,7 @@ Unless there are already pretrained weights in the HDD, run this block to unzip 
 
 %cd weights/  
 \!unzip "\*.zip"  
-%cd /home/u3618315/ \#move to home page
+%cd \~/ \#move to home page
 
 Then, check the Ultralytics repo directory.
 
@@ -151,13 +151,13 @@ You can find their notebook blocks on the 1st and the 2nd pages of this document
 \# Once the address checking is done, start training the model with (y)our custom dataset  
 \!jupyter \--paths
 
-filedir \= '/home/u3618315/cardiacyv8/'  
-yamldir \= '/home/u3618315/cardiacyv8/datav11.yaml'  
-homedir \= '/home/u3618315/'  
-weightdir \= '/home/u3618315/weights/' \# adaptable or…  
+filedir \= '\~/cardiacyv8/'  
+yamldir \= '\~/cardiacyv8/datav11.yaml'  
+homedir \= '\~/'  
+weightdir \= '\~/weights/' \# adaptable or…  
 \# weightdir \= yolodir \+ 'runs/'  
-datadir \= '/home/u3618315/obb\_dataset/test/images/'  
-yolodir \= '/home/u3618315/yolo\_alternative\_loss\_functions/'
+datadir \= '\~/obb\_dataset/test/images/'  
+yolodir \= '\~/yolo\_alternative\_loss\_functions/'
 
 \#\!pip install zip  
 \#\!sudo apt-get update && apt-get install \-y zip
@@ -214,7 +214,7 @@ for i in range(1): \#where i is the number of child subfolders
 Finally, we will zip the detection subfolders to save on your HDD. So that you can view the results on your machine/device.
 
 \# Create a list of the directory names  
-%cd /home/u3618315/yolo\_alternative\_loss\_functions/  
+%cd \~/yolo\_alternative\_loss\_functions/  
 results\_dirs \= \[f"{yolodir}results{i}" for i in range(1, 33)\]  
 \# where i is the number of result folders we have created before.  
 \# Join the directory names into a single string, separated by spaces  
