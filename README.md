@@ -9,31 +9,32 @@ Links
 
 **Training & Validation**
 
-	To train YOLO models against a custom dataset & custom loss function, you need to run the “Training\_Validation.ipynb” file.
-
+	To train YOLO models against a custom dataset & custom loss function, you need to run the “Training\_Validation.ipynb” file.  
 \!pip install supervision  
-\#in case zip is not found in the shell environment  
 \!sudo apt update  
 \!sudo apt install zip
 
-Run this block twice: once before saving the pickle file “datacar.pkl”, and once afterwards.
+import os
 
+homedir \= os.path.expanduser("\~")  
+print(f"Home directory: {homedir}")
+
+Run this block twice: once before saving the pickle file “datacar.pkl”, and once afterwards.  
 j \= 0 \#switch j between 0 & 1 to run this block twice  
-for i in range (j,2): \#switch j between 0 & 1: before & after saving pickle  
+for i in range (j,2): \#switch j between 0 & 1  
     if i \== 0:  
         \!pip uninstall ultralytics \-y  
-         \!git clone https://github.com/Suppersine/yolo\_alternative\_loss\_functions.git  
+        \!git clone https://github.com/Suppersine/yolo\_alternative\_loss\_functions.git  
     %cd yolo\_alternative\_loss\_functions  
-    \!pip install \-e .  
-   \# \~/ depends on the home directory  
-     
+    \!pip install \-e .
+
     if i \== 0:  
         import os  
         os.kill(os.getpid(), 9)  \# This will restart the runtime  
     else:  
         import sys  
-        sys.path.insert(0, '\~/yolo\_alternative\_loss\_functions')  
-         
+        sys.path.insert(0, f'{homedir}/yolo\_alternative\_loss\_functions')
+
         \# Now you can import ultralytics modules  
         import ultralytics  
         from ultralytics import YOLO  
@@ -85,27 +86,25 @@ Once done looping, initialise the YOLO model, addresses, essential settings, etc
 import ultralytics  
 from ultralytics import YOLO  
 print(ultralytics.\_\_file\_\_)  \# Should point to your cloned directory  
-\#once the address checking is done, start training the model with (y)our custom dataset  
+\#once the address checking is done, start training the model with (y)our custom dataset
+
 \!jupyter \--paths
 
-filedir \= '\~/obb\_dataset/'  
-yamldir \= '\~/obb\_dataset/datav11.yaml'  
-homedir \= '\~/'  
-yolodir \= '\~/yolo\_alternative\_loss\_functions/'
-
-\#\!pip install zip  
-\#\!sudo apt-get update && apt-get install \-y zip
+filedir \= f'{homedir}/obb\_dataset/'  
+yamldir \= f'{homedir}/obb\_dataset/datav11.yaml'  
+yolodir \= f'{homedir}/yolov11-OBB/'  
+homedir \= str(f'{homedir}/')
 
 Then, we can commence training the model.
 
 \# Load a model (N-submodel)  
-model \= YOLO("yolov8n-obb.pt")  \# load a pretrained model (recommended for training)  
+model \= YOLO("yolo11n-obb.pt")  \# load a pretrained model (recommended for training)  
 \!yolo task\=obb mode\=train model\=yolov8n\-obb.pt data\={yamldir} epochs\=300 imgsz\=640 plots\=True
 
 Finally, to end the “Training\_Validation.ipynb” file & save weights, we will run the validation block. Adjust the nmod integer to count how many submodels you have trained so far.
 
 \#validation & test  
-nmod \= 4  
+nmod \= 4	  
 for i in range (nmod): \# where nmod is the number of models trained  
     if i \== 0:  
         weightaddress \= str(f'{yolodir}runs/obb/train/weights/best.pt')  
@@ -122,7 +121,8 @@ for i in range (nmod): \# where nmod is the number of models trained
      
     print("classwise mAPs")  
     print(val.box.maps)  
-\!zip \-r yolo\_obb.zip runs  
+\!zip \-r weights.zip runs
+
 **Batch Detection Test**
 
 Check environmental readiness:
@@ -132,12 +132,45 @@ Check environmental readiness:
 \!sudo apt install zip  
 \!pip install supervision
 
+import os
+
+homedir \= os.path.expanduser("\~")  
+print(f"Home directory: {homedir}")
+
+Check essential addresses. If the double-nested loop fails, check again.
+
+\# Check addresses of Jupyter paths  
+\!jupyter \--paths
+
+pretrainedwt \= True
+
+filedir \= f'{homedir}/cardiacyv8/'  
+yamldir \= f'{homedir}/cardiacyv8/datav11.yaml'  
+datadir \= f'{homedir}/obb\_dataset/test/images/'  
+yolodir \= f'{homedir}/yolov11-OBB/'  
+homedir \= f'{homedir}/'
+
+\#\!pip install zip  
+\#\!sudo apt-get update && apt-get install \-y zip
+
 Unless there are already pretrained weights in the HDD, run this block to unzip uploaded weights, which must be uploaded to {HOMEDIR}/weights/.
 
-%cd weights/  
-\!unzip "\*.zip"  
-%cd \~/ \#move to home page
-
+if not pretrainedwt:  
+    if not os.path.exists(f'{homedir}/'):  
+        os.makedirs("weights") \#then upload the weights.zip file to the weights directory  
+        %cd weights/  
+        \!unzip "\*.zip"  
+        weightdir \= f'{homedir}/weights/'  
+     
+    else:  
+        print("Weights directory already exists. Skipping creation.")  
+        %cd weights/  
+        \!unzip "\*.zip"  
+        weightdir \= f'{homedir}/weights/'  
+         
+else: \#in case you want to detect with newly trained weights.  
+    weightdir \= yolodir  
+%cd {homedir} \#cd back to home dir  
 Then, check the Ultralytics repo directory.
 
 \#check ultralytics address  
@@ -145,27 +178,41 @@ import ultralytics
 from ultralytics import YOLO  
 print(ultralytics.\_\_file\_\_)  \# Should point to your cloned directory
 
-If absent, rerun the looped blocks, which are structurally identical to those of the training file.  
-You can find their notebook blocks on the 1st and the 2nd pages of this document. Next up, we will define essential paths for the batch detection step.
+If absent, rerun the looped blocks\*, which are structurally identical to those of the training file.  
+\*You can find them on the 1st and 2nd pages of this document.  
+Next up, using a GUI file explorer (in Jupyter or COLAB’s left panel), make sure you count the total number of subfolders within {weightdir} to plan loop nesting.
 
-\# Once the address checking is done, start training the model with (y)our custom dataset  
-\!jupyter \--paths
+\# Define the weight directory (kept for context from the original snippet)  
+\# weightdir \= "/sample\_data/"  
+wtdir \= f'{weightdir}runs/obb/' \# Assuming 'weightdir' is defined elsewhere in the notebook
 
-filedir \= '\~/cardiacyv8/'  
-yamldir \= '\~/cardiacyv8/datav11.yaml'  
-homedir \= '\~/'  
-weightdir \= '\~/weights/' \# adaptable or…  
-\# weightdir \= yolodir \+ 'runs/'  
-datadir \= '\~/obb\_dataset/test/images/'  
-yolodir \= '\~/yolo\_alternative\_loss\_functions/'
+\# print(wtdir)  
+\# Execute the find command and capture its output  
+\# \-maxdepth 1: Only look in the specified directory  
+\# \-mindepth 1: Don't count the specified directory itself  
+\# \-type d: Only consider directories  
+\# \-name "train\*": Match directory names that start with "train"  
+\# The 'capture\_output=True' flag ensures the output is returned  
+\# The .stdout.decode().strip() part gets the string output, decodes it, and removes whitespace  
+command \= f"find {wtdir} \-maxdepth 1 \-mindepth 1 \-type d \-name 'train\*' | wc \-l"  
+print(command)  
+import subprocess  
+result \= subprocess.run(command, shell\=True, capture\_output\=True, text\=True)
 
-\#\!pip install zip  
-\#\!sudo apt-get update && apt-get install \-y zip
+\# Convert the captured output to an integer and store it in 'subf'  
+\# The output from wc \-l is a string, so we strip any whitespace and convert to int  
+try:  
+    subf \= int(result.stdout.strip())  
+    print(f"Number of 'train' subfolders found: {subf}")  
+except ValueError:  
+    subf \= 0  
+    print("No 'train' subfolders found or error parsing output.")  
+except Exception as e:  
+    subf \= 0  
+    print(f"An error occurred: {e}")
 
-Using a GUI file explorer (in Jupyter or COLAB’s left panel), make sure you count the total number of subfolders within {weightdir} to plan loop nesting.
+After planning to loop, we will proceed with batch detection.
 
-for i in range(4): \#where i \= number of subfolders in weightdir regardless of \#depth  
-    \!mkdir "results{i+1}"  
 \#batch detection test  
 import os  
 from pathlib import Path  \# Improved file path handling  
@@ -174,49 +221,49 @@ import random
 import supervision as sv  
 import cv2
 
-k \= 0  
-for i in range(1): \#where i is the number of child subfolders  
-    for j in range(4): \#where j is the number of grandchild subfolders (all must be equal across all i)  
-        k \+= 1  
-        if j \== 0:  
-            weightaddress \= str(f'{weightdir}runs/obb/train/weights/best.pt')  
-        else:  
-            weightaddress \= str(f'{weightdir}runs/obb/train{j\+1}/weights/best.pt')  
-        model \= YOLO(weightaddress)  
+k \= 0
+
+for i in range(subf):  
+    k \+= 1  
+    if i \== 0:  
+        weightaddress \= str(f'{weightdir}runs/obb/train/weights/best.pt')  
+    else:  
+        weightaddress \= str(f'{weightdir}runs/obb/train{i\+1}/weights/best.pt')  
+    model \= YOLO(weightaddress)  
+     
+    \# Define the test image directory  
+    test\_dir \= Path(f"{datadir}")  \# Use Path for better handling  
+     
+    \# Loop through all image files  
+    for image\_path in test\_dir.glob("\*.png"):  \# Modify extension if needed (e.g., \*.png)  
+        \# Perform detection  
+        results \= model(str(image\_path))  \# Convert Path to string for YOLO  
          
-        \# Define the test image directory  
-        test\_dir \= Path(f"{datadir}")  \# Use Path for better handling  
+        \# Extract filename  
+        filename \= image\_path.name  
          
-        \# Loop through all image files  
-        for image\_path in test\_dir.glob("\*.png"):  \# Modify extension if needed (e.g., \*.png)  
-            \# Perform detection  
-            results \= model(str(image\_path))  \# Convert Path to string for YOLO  
-             
-            \# Extract filename  
-            filename \= image\_path.name  
-             
-            \# Process and annotate detections (same as your code)  
-            detections \= sv.Detections.from\_ultralytics(results\[0\])  
-            oriented\_box\_annotator \= sv.OrientedBoxAnnotator()  
-            annotated\_frame \= oriented\_box\_annotator.annotate(  
-                scene\=cv2.imread(str(image\_path)),  
-                detections\=detections  
-            )  
-             
-            \# Define output path (modify as needed)  
-            output\_path \= Path(f"{yolodir}/results{k}/{filename}")  
-             
-            \# Save the annotated image (replace with desired format if needed)  
-            cv2.imwrite(str(output\_path), annotated\_frame)  
-             
-            \# Optional: Print progress  
-            print(f"Detection results saved for: {filename}")  
+        \# Process and annotate detections (same as your code)  
+        detections \= sv.Detections.from\_ultralytics(results\[0\])  
+        oriented\_box\_annotator \= sv.OrientedBoxAnnotator()  
+        annotated\_frame \= oriented\_box\_annotator.annotate(  
+            scene\=cv2.imread(str(image\_path)),  
+            detections\=detections  
+        )  
+         
+        \# Define output path (modify as needed)  
+        output\_path \= Path(f"{yolodir}/results{k}/{filename}")  
+         
+        \# Save the annotated image (replace with desired format if needed)  
+        cv2.imwrite(str(output\_path), annotated\_frame)  
+         
+        \# Optional: Print progress  
+        print(f"Detection results saved for: {filename}")  
 Finally, we will zip the detection subfolders to save on your HDD. So that you can view the results on your machine/device.
 
 \# Create a list of the directory names  
-%cd \~/yolo\_alternative\_loss\_functions/  
-results\_dirs \= \[f"{yolodir}results{i}" for i in range(1, 33)\]  
-\# where i is the number of result folders we have created before.  
+%cd /home/u3618315/yolo\_alternative\_loss\_functions/  
+results\_dirs \= \[f"{yolodir}results{i\+1}" for i in range(0, subf)\]
+
 \# Join the directory names into a single string, separated by spaces  
 dirs\_to\_zip \= " ".join(results\_dirs)
 
@@ -226,4 +273,9 @@ zip\_command \= f"zip \-r yolov11\_detections.zip {dirs\_to\_zip}"
 \# Execute the command using Jupyter's shell magic  
 \!{zip\_command}
 
-print(f"Created yolov11\_detections.zip containing: {dirs\_to\_zip}")  
+print(f"Created yolov11\_detections.zip containing: {dirs\_to\_zip}")
+
+If you want, clear your HDD.
+
+for i in range(0,subf):  
+  \!rm \-r "results{i+1}"  
